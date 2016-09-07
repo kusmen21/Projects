@@ -16,7 +16,7 @@ public class setTest
         set.add(two);
 
         int hashOne = one.hashCode();
-        boolean isContains =fazcazscv set.contains(one);
+        boolean isContains = set.contains(one);
 
         one.age = 100;
 
