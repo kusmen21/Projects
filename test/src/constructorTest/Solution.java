@@ -1,34 +1,30 @@
 package constructorTest;
 
 
-public class Solution
-{
-    public static void main(String[] args)
-    {
-        new B();
+class Tree {
+    int leavesCount;
+    String treeName;
+    Tree (int leaves){
+        this.leavesCount = leaves;
+        System.out.println("int constructor");
     }
-
-    static class A
-    {
-        {
-            System.out.println("non-static initialize");
-        }
-        static
-        {
-            System.out.println("static initialize");
-        }
-
-        public A()
-        {
-            System.out.println("class A");
-        }
+    Tree (String treeName, int leaves){
+        this(leaves);
+        System.out.println("(String, int) constructor");
     }
-
-    static class B extends A
-    {
-        public B()
-        {
-            System.out.println("class B");
-        }
+    Tree (String treeName){
+        this.treeName = treeName;
+        System.out.println("String constructor");
+    }
+    Tree () {
+        this("huge tree", 50000);
+        System.out.println("constructor without parameters");
+    }
+    void printLeavesCount(){
+        System.out.println("leavesCount = " + leavesCount + " treeName = " + treeName);
+    }
+    public static void main (String[] args) {
+        Tree tree = new Tree();
+        tree.printLeavesCount();
     }
 }
