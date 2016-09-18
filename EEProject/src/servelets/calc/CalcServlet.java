@@ -7,21 +7,18 @@ package servelets.calc;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-/**
- *
- * @author Tim
- */
+
 public class CalcServlet extends HttpServlet
 {
-    private HashMap<String, String> listOperations;
+    private Map<String, String> listOperations;
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException
@@ -54,31 +51,40 @@ public class CalcServlet extends HttpServlet
             double result = calcResult(operType, one, two);
 
             // для новой сессии создаем новый список
-            if (session.isNew()) {
-                listOperations = new ArrayList<>();
+            if (request.getServletContext().getAttribute("formula") == null)
+            {
+                listOperations = new HashMap<>();
             } 
-            else { // иначе получаем список из атрибутов сессии
-                listOperations = (ArrayList<String>) session.getAttribute("formula");
+            else // иначе получаем список из атрибутов сессии
+            {
+                listOperations = (HashMap<String, String>) request.getServletContext().getAttribute("formula");
             }
 
             // добавление новой операции в список и атрибут сессии
-            listOperations.add(one + " " + operType.getStringValue() + " " + two + " = " + result);
-            session.setAttribute("formula", listOperations);
-
+            if (!listOperations.containsKey(session.getId()))
+            {
+                listOperations.put(session.getId(), one + " " + operType.getStringValue() + " " + two + " = " + result);
+            }
+            else
+            {
+                listOperations.replace(session.getId(), listOperations.get(session.getId()) + "split" +
+                        one + " " + operType.getStringValue() + " " + two + " = " + result);
+            }
+            request.getServletContext().setAttribute("formula", listOperations);
 
             // вывод всех операций
             out.println("<h1>ID вашей сессии равен: " + session.getId() + "</h1>");
-         
-            out.println("<h3>Список операций (всего:" + listOperations.size() + ") </h3>");
 
-
-            for (String oper : listOperations) {
-                out.println("<h3>" + oper + "</h3>");
+            for (Map.Entry<String, String> pair : listOperations.entrySet())
+            {
+                out.println("<h3> Session ID = " + pair.getKey() + "</h3>");
+                String[] array = pair.getValue().split("split");
+                out.println("<h3>Operations list (total:" + array.length + ") </h3>");
+                for (String text : array)
+                {
+                    out.println("<h5>" + text + "</h5>");
+                }
             }
-
-            //показывает, что атрибут виден во всех сервелетах
-            out.println("<br>" + "ServeletContextAtribute = " +
-                    request.getServletContext().getAttribute("ServeletContextAtribute"));
         } catch (Exception ex)
         {
             out.println("<h1>" + ex + "</h1>" );
@@ -154,7 +160,6 @@ public class CalcServlet extends HttpServlet
                 result = CalcOperations.multiply(one, two);
                 break;
             }
-
         }
 
         return result;
